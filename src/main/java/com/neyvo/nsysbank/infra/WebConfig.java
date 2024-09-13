@@ -1,4 +1,4 @@
-package com.neyvo.nsysbank;
+package com.neyvo.nsysbank.infra;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
