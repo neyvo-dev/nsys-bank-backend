@@ -1,11 +1,23 @@
 version: '3.8'
 
 services:
+  spring-boot-app:
+    image: myapp:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+
   mongodb:
     image: mongo:latest
     container_name: mongodb
     ports:
       - "27017:27017"
+    networks:
+      - monitoring
     volumes:
       - mongodb_data:/data/db
 
@@ -13,6 +25,8 @@ services:
     image: 'bitnami/kafka:latest'
     ports:
       - '9094:9094'
+    networks:
+      - monitoring
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
@@ -22,5 +36,30 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
 
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  grafana:
+      image: grafana/grafana:latest
+      ports:
+        - "3000:3000"
+      networks:
+        - monitoring
+      depends_on:
+        - prometheus
+      volumes:
+        - grafana_data:/var/lib/grafana
+
+networks:
+    monitoring:
+      driver: bridge
+
 volumes:
   mongodb_data:
+  grafana_data:
