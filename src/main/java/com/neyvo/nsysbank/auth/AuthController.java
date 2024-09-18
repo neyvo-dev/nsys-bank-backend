@@ -1,5 +1,6 @@
 package com.neyvo.nsysbank.auth;
 
+import com.neyvo.nsysbank.infra.TokenService;
 import com.neyvo.nsysbank.user.User;
 import com.neyvo.nsysbank.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,18 @@ public class AuthController {
   @Autowired
   private UserRepository repository;
 
+  @Autowired
+  private TokenService tokenService;
+
   @PostMapping("/login")
   public ResponseEntity login(@RequestBody LoginDTO data) {
 
     var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
     var auth = this.authenticationManager.authenticate(usernamePassword);
+    var token = tokenService.generateToken((User) auth.getPrincipal());
 
-    return ResponseEntity.ok().build();
+
+    return ResponseEntity.ok(new LoginResponseDTO(token));
   }
 
   @PostMapping("/register")
